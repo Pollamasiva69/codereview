@@ -3,7 +3,7 @@ import { createServer } from 'http';
 import { WebSocketServer } from 'ws';
 import cors from 'cors';
 import dotenv from 'dotenv';
-import { analyzeCode } from './services/aiAnalyzer.js';
+import { analyzeCode, getAvailableProviders } from './services/aiAnalyzer.js';
 
 dotenv.config();
 
@@ -22,6 +22,21 @@ app.get('/health', (req, res) => {
   res.json({ status: 'ok', message: 'AI Code Reviewer backend is running' });
 });
 
+// Get available AI providers
+app.get('/api/providers', (req, res) => {
+  try {
+    const providers = getAvailableProviders();
+    const defaultProvider = process.env.DEFAULT_AI_PROVIDER || 'claude';
+    res.json({
+      providers,
+      default: defaultProvider
+    });
+  } catch (error) {
+    console.error('Error getting providers:', error);
+    res.status(500).json({ error: 'Failed to get providers' });
+  }
+});
+
 // WebSocket connection handling
 wss.on('connection', (ws) => {
   console.log('New WebSocket connection established');
@@ -29,7 +44,7 @@ wss.on('connection', (ws) => {
   ws.on('message', async (message) => {
     try {
       const data = JSON.parse(message.toString());
-      const { type, code, language } = data;
+      const { type, code, language, provider } = data;
 
       if (type === 'analyze') {
         // Send acknowledgment
@@ -39,7 +54,7 @@ wss.on('connection', (ws) => {
         }));
 
         // Perform analysis
-        const analysis = await analyzeCode(code, language);
+        const analysis = await analyzeCode(code, language, provider);
 
         // Send results
         ws.send(JSON.stringify({
@@ -68,13 +83,13 @@ wss.on('connection', (ws) => {
 // REST API endpoint (alternative to WebSocket)
 app.post('/api/analyze', async (req, res) => {
   try {
-    const { code, language } = req.body;
+    const { code, language, provider } = req.body;
 
     if (!code) {
       return res.status(400).json({ error: 'Code is required' });
     }
 
-    const analysis = await analyzeCode(code, language || 'javascript');
+    const analysis = await analyzeCode(code, language || 'javascript', provider);
     res.json(analysis);
   } catch (error) {
     console.error('Analysis error:', error);

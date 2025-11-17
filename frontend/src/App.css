@@ -45,7 +45,8 @@
   border-bottom: 1px solid #333;
 }
 
-.language-select {
+.language-select,
+.provider-select {
   padding: 0.5rem 1rem;
   background: #3c3c3c;
   color: #d4d4d4;
@@ -55,8 +56,13 @@
   font-size: 0.9rem;
 }
 
-.language-select:hover {
+.language-select:hover,
+.provider-select:hover {
   background: #464646;
+}
+
+.provider-select {
+  min-width: 140px;
 }
 
 .analyze-btn {

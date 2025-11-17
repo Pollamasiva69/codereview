@@ -1,7 +1,7 @@
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useEffect } from 'react';
 import CodeEditor from './components/CodeEditor';
 import AnalysisPanel from './components/AnalysisPanel';
-import { analyzeCode } from './services/api';
+import { analyzeCode, getProviders } from './services/api';
 import './App.css';
 
 function App() {
@@ -15,16 +15,33 @@ const password = "admin123";
 const apiKey = "sk-1234567890abcdef";
 `);
   const [language, setLanguage] = useState('javascript');
+  const [provider, setProvider] = useState('');
+  const [availableProviders, setAvailableProviders] = useState([]);
   const [analysis, setAnalysis] = useState(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
+
+  // Load available providers on mount
+  useEffect(() => {
+    async function loadProviders() {
+      try {
+        const data = await getProviders();
+        setAvailableProviders(data.providers || []);
+        setProvider(data.default || 'claude');
+      } catch (err) {
+        console.error('Failed to load providers:', err);
+        setProvider('claude');
+      }
+    }
+    loadProviders();
+  }, []);
 
   const handleAnalyze = useCallback(async () => {
     setLoading(true);
     setError(null);
 
     try {
-      const result = await analyzeCode(code, language);
+      const result = await analyzeCode(code, language, provider);
       setAnalysis(result);
     } catch (err) {
       setError(err.message);
@@ -32,7 +49,7 @@ const apiKey = "sk-1234567890abcdef";
     } finally {
       setLoading(false);
     }
-  }, [code, language]);
+  }, [code, language, provider]);
 
   const handleApplyRefactoring = useCallback(() => {
     if (analysis?.refactoring?.improvedCode) {
@@ -45,7 +62,7 @@ const apiKey = "sk-1234567890abcdef";
     <div className="app">
       <header className="app-header">
         <h1>🤖 AI Code Reviewer & Refactorer</h1>
-        <p>Powered by Claude AI - Detect vulnerabilities, optimize performance, and improve code quality</p>
+        <p>AI-powered code analysis - Detect vulnerabilities, optimize performance, and improve code quality</p>
       </header>
 
       <div className="app-container">
@@ -66,6 +83,25 @@ const apiKey = "sk-1234567890abcdef";
               <option value="php">PHP</option>
               <option value="ruby">Ruby</option>
             </select>
+
+            {availableProviders.length > 0 && (
+              <select
+                value={provider}
+                onChange={(e) => setProvider(e.target.value)}
+                className="provider-select"
+                title="Select AI Provider"
+              >
+                {availableProviders.map((p) => (
+                  <option key={p} value={p}>
+                    {p === 'claude' && '🧠 Claude'}
+                    {p === 'openai' && '🤖 GPT'}
+                    {p === 'gemini' && '✨ Gemini'}
+                    {p === 'deepseek' && '🔍 Deepseek'}
+                    {p === 'kimi' && '🌙 Kimi'}
+                  </option>
+                ))}
+              </select>
+            )}
 
             <button
               onClick={handleAnalyze}

@@ -1,9 +1,11 @@
 # AI Code Reviewer & Refactorer
 
-An intelligent code review tool powered by Claude AI that analyzes your code for security vulnerabilities, performance issues, and provides automated refactoring suggestions.
+An intelligent code review tool powered by multiple AI providers (Claude, GPT, Gemini, Deepseek, Kimi) that analyzes your code for security vulnerabilities, performance issues, and provides automated refactoring suggestions.
 
 ## Features
 
+- **Multiple AI Providers**: Choose between Claude, GPT-4, Gemini, Deepseek, and Kimi
+- **Claude Extended Thinking**: Advanced reasoning with Claude's thinking mode enabled
 - **Real-time Code Analysis**: Get instant feedback on your code quality
 - **Security Vulnerability Detection**: Identify SQL injection, XSS, authentication flaws, and more
 - **Performance Optimization**: Detect inefficient code patterns and get optimization suggestions
@@ -11,6 +13,7 @@ An intelligent code review tool powered by Claude AI that analyzes your code for
 - **Multi-language Support**: JavaScript, TypeScript, Python, Java, C#, Go, Rust, PHP, Ruby
 - **Monaco Editor**: Professional code editor with syntax highlighting
 - **WebSocket Support**: Real-time bidirectional communication for instant feedback
+- **Provider Agnostic**: AI responses don't reveal which provider is being used
 
 ## Tech Stack
 
@@ -24,7 +27,12 @@ An intelligent code review tool powered by Claude AI that analyzes your code for
 - **Node.js**: Runtime environment
 - **Express**: Web framework
 - **WebSocket (ws)**: Real-time communication
-- **Anthropic Claude API**: AI-powered code analysis
+- **Multi-AI Support**:
+  - Anthropic Claude (with extended thinking)
+  - OpenAI GPT-4
+  - Google Gemini
+  - Deepseek
+  - Kimi (Moonshot AI)
 
 ## Architecture
 
@@ -33,15 +41,17 @@ An intelligent code review tool powered by Claude AI that analyzes your code for
 │                 │◄──────────────────────────────►│                 │
 │   React App     │                                │  Express Server │
 │  Monaco Editor  │         Code Analysis          │   WebSocket     │
+│  AI Selector    │                                │  Multi-Provider │
 │                 │                                │                 │
 └─────────────────┘                                └────────┬────────┘
                                                             │
-                                                            │
-                                                            ▼
-                                                   ┌─────────────────┐
-                                                   │  Claude AI API  │
-                                                   │  Code Analysis  │
-                                                   └─────────────────┘
+                                      ┌─────────────────────┼─────────────────────┐
+                                      │                     │                     │
+                                      ▼                     ▼                     ▼
+                              ┌──────────────┐    ┌──────────────┐      ┌──────────────┐
+                              │   Claude AI  │    │  OpenAI GPT  │ ...  │ Gemini/Other │
+                              │  (Thinking)  │    │              │      │              │
+                              └──────────────┘    └──────────────┘      └──────────────┘
 ```
 
 ## Getting Started
@@ -49,7 +59,12 @@ An intelligent code review tool powered by Claude AI that analyzes your code for
 ### Prerequisites
 
 - Node.js 18+ installed
-- Anthropic API key (get one at https://console.anthropic.com/)
+- At least one AI provider API key:
+  - **Claude**: https://console.anthropic.com/ (recommended, has thinking mode)
+  - **OpenAI**: https://platform.openai.com/api-keys
+  - **Gemini**: https://makersuite.google.com/app/apikey
+  - **Deepseek**: https://platform.deepseek.com/
+  - **Kimi**: https://platform.moonshot.cn/
 
 ### Installation
 
@@ -77,9 +92,21 @@ An intelligent code review tool powered by Claude AI that analyzes your code for
    cp .env.example .env
    ```
 
-   Edit `.env` and add your Anthropic API key:
+   Edit `.env` and add your AI provider API keys (at least one is required):
    ```
-   ANTHROPIC_API_KEY=your_api_key_here
+   # Choose default provider
+   DEFAULT_AI_PROVIDER=claude
+
+   # Add API keys for providers you want to use
+   ANTHROPIC_API_KEY=your_anthropic_key_here
+   OPENAI_API_KEY=your_openai_key_here
+   GOOGLE_API_KEY=your_google_key_here
+   DEEPSEEK_API_KEY=your_deepseek_key_here
+   KIMI_API_KEY=your_kimi_key_here
+
+   # Enable Claude thinking mode (recommended)
+   ENABLE_CLAUDE_THINKING=true
+
    PORT=3001
    ```
 

@@ -31,19 +31,35 @@ cd backend
 cp .env.example .env
 ```
 
-Edit `backend/.env` and add your Anthropic API key:
+Edit `backend/.env` and configure your AI providers (at least one is required):
 
 ```env
+# Choose your default AI provider
+DEFAULT_AI_PROVIDER=claude
+
+# Add API keys for the providers you want to use
 ANTHROPIC_API_KEY=sk-ant-your-api-key-here
+OPENAI_API_KEY=sk-your-openai-key-here
+GOOGLE_API_KEY=your-google-api-key-here
+DEEPSEEK_API_KEY=your-deepseek-key-here
+KIMI_API_KEY=your-kimi-key-here
+
+# Enable Claude thinking mode (highly recommended)
+ENABLE_CLAUDE_THINKING=true
+
 PORT=3001
 ```
 
-**Get your API key:**
-1. Go to https://console.anthropic.com/
-2. Sign up or log in
-3. Navigate to API Keys section
-4. Create a new API key
-5. Copy and paste it into your `.env` file
+**Get your API keys:**
+
+- **Claude (recommended)**: https://console.anthropic.com/
+  - Supports extended thinking mode for better analysis
+- **OpenAI (GPT-4)**: https://platform.openai.com/api-keys
+- **Google Gemini**: https://makersuite.google.com/app/apikey
+- **Deepseek**: https://platform.deepseek.com/
+- **Kimi (Moonshot)**: https://platform.moonshot.cn/
+
+You only need at least one API key to get started!
 
 ### 3. Start the Application
 

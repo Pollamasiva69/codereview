@@ -41,15 +41,32 @@ export function onWebSocketMessage(handler) {
   };
 }
 
+// Get available AI providers
+export async function getProviders() {
+  try {
+    const response = await fetch(`${API_URL}/api/providers`);
+
+    if (!response.ok) {
+      throw new Error(`Failed to fetch providers: ${response.status}`);
+    }
+
+    const data = await response.json();
+    return data;
+  } catch (error) {
+    console.error('API error:', error);
+    return { providers: ['claude'], default: 'claude' };
+  }
+}
+
 // REST API for code analysis
-export async function analyzeCode(code, language = 'javascript') {
+export async function analyzeCode(code, language = 'javascript', provider = null) {
   try {
     const response = await fetch(`${API_URL}/api/analyze`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify({ code, language }),
+      body: JSON.stringify({ code, language, provider }),
     });
 
     if (!response.ok) {
@@ -66,7 +83,7 @@ export async function analyzeCode(code, language = 'javascript') {
 }
 
 // WebSocket-based analysis (for real-time feedback)
-export function analyzeCodeWS(code, language = 'javascript') {
+export function analyzeCodeWS(code, language = 'javascript', provider = null) {
   return new Promise((resolve, reject) => {
     const socket = connectWebSocket();
 
@@ -85,14 +102,16 @@ export function analyzeCodeWS(code, language = 'javascript') {
       socket.send(JSON.stringify({
         type: 'analyze',
         code,
-        language
+        language,
+        provider
       }));
     } else {
       socket.addEventListener('open', () => {
         socket.send(JSON.stringify({
           type: 'analyze',
           code,
-          language
+          language,
+          provider
         }));
       });
     }
